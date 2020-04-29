@@ -113,18 +113,21 @@ COPY helpers /opt/ol/helpers
 COPY fixes/ /opt/ol/fixes/
 COPY licenses /licenses
 
+## https://github.com/OpenLiberty/ci.docker/blob/master/releases/19.0.0.12/kernel/Dockerfile.ubuntu.adoptopenjdk8
 # Install Open Liberty
-RUN yum -y install wget unzip \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends unzip openssl wget \
+    && rm -rf /var/lib/apt/lists/* \
     && wget -q $LIBERTY_DOWNLOAD_URL -U UA-Open-Liberty-Docker -O /tmp/wlp.zip \
     && echo "$LIBERTY_SHA  /tmp/wlp.zip" > /tmp/wlp.zip.sha1 \
     && sha1sum -c /tmp/wlp.zip.sha1 \
-    && chmod -R g+x /usr/bin \
     && unzip -q /tmp/wlp.zip -d /opt/ol \
     && rm /tmp/wlp.zip \
     && rm /tmp/wlp.zip.sha1 \
-    && adduser -u 1001 -r -g root -s /usr/sbin/nologin default \
-    && yum -y remove wget unzip \
-    && yum clean all \
+    && apt-get remove -y unzip \
+    && apt-get remove -y wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -u 1001 -r -g 0 -s /usr/sbin/nologin default \
     && chown -R 1001:0 /opt/ol/wlp \
     && chmod -R g+rw /opt/ol/wlp
 
